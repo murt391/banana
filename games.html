@@ -167,7 +167,7 @@
             position: relative;
             z-index: 10;
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 24px;
             width: calc(100% - 400px);
             margin: 35px auto 50px auto;
@@ -200,16 +200,14 @@
             box-shadow: 0 12px 28px rgba(0, 0, 0, 0.6);
         }
 
-        /* Icon resized as a 1:1 square aspect ratio */
+        /* Container for 1:1 square pictures (e.g. 1000x1000) */
         .card-logo {
             width: 100%;
-            max-width: 1000px;
-            aspect-ratio: 1 / 1;
-            object-fit: contain;
+            aspect-ratio: 1 / 1; /* Forces exact square fit for 1000x1000 images */
+            object-fit: cover;   /* Fills the square area completely without stretching */
             border-radius: 10px;
             background-color: rgba(0, 0, 0, 0.25);
             margin-bottom: 16px;
-            padding: 10px;
             box-sizing: border-box;
         }
 
@@ -307,7 +305,7 @@
                 card.href = game.file;
 
                 card.innerHTML = `
-                    <img class="card-logo" src="${game.logo}" alt="${game.name} Logo" width="1000" height="1000" loading="lazy">
+                    <img class="card-logo" src="${game.logo}" alt="${game.name} Logo" loading="lazy">
                     <h2 class="card-name">${game.name}</h2>
                     <p class="card-description">${game.description}</p>
                 `;
