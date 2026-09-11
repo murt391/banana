@@ -167,7 +167,7 @@
             position: relative;
             z-index: 10;
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
             gap: 24px;
             width: calc(100% - 400px);
             margin: 35px auto 50px auto;
@@ -200,11 +200,12 @@
             box-shadow: 0 12px 28px rgba(0, 0, 0, 0.6);
         }
 
-        /* Auto-resizes and fits any logo image without distortion */
+        /* Icon resized as a 1:1 square aspect ratio */
         .card-logo {
             width: 100%;
-            height: 160px;
-            object-fit: contain; /* Scales picture down to fit perfectly */
+            max-width: 1000px;
+            aspect-ratio: 1 / 1;
+            object-fit: contain;
             border-radius: 10px;
             background-color: rgba(0, 0, 0, 0.25);
             margin-bottom: 16px;
@@ -263,13 +264,15 @@
                     <input type="text" id="searchInput" class="search-input" placeholder="Search games..." />
                 </div>
 
-                <!-- Arrow Button -->
-                <button class="back-btn" onclick="history.back()" aria-label="Go back">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="5" y1="12" x2="19" y2="12"></line>
-                        <polyline points="12 5 19 12 12 19"></polyline>
-                    </svg>
-                </button>
+                <!-- Back Arrow Button -> Redirects to index.html -->
+                <a href="index.html" aria-label="Go to home page">
+                    <button class="back-btn" type="button">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                    </button>
+                </a>
             </div>
         </header>
 
@@ -304,7 +307,7 @@
                 card.href = game.file;
 
                 card.innerHTML = `
-                    <img class="card-logo" src="${game.logo}" alt="${game.name} Logo" loading="lazy">
+                    <img class="card-logo" src="${game.logo}" alt="${game.name} Logo" width="1000" height="1000" loading="lazy">
                     <h2 class="card-name">${game.name}</h2>
                     <p class="card-description">${game.description}</p>
                 `;
