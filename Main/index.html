@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banana</title>
+    <style>
+        /* Fill the full screen and set the background color */
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgb(25, 25, 25);
+            overflow: hidden;
+            
+            /* Center the text vertically and horizontally */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            
+            /* Font styling */
+            font-family: "Comic Sans MS", "Comic Sans", cursive, sans-serif;
+            
+            /* Prevent text selection highlighting */
+            user-select: none;
+        }
+
+        /* Position the canvas behind the text */
+        #dotCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* Keep text container above the canvas dot background */
+        .content {
+            position: relative;
+            z-index: 2;
+            pointer-events: none; /* Allows mouse events to pass through to canvas */
+            text-align: center;
+        }
+
+        .main-text {
+            color: #ffed85; /* Main text yellow */
+            font-size: 7.5rem;
+            font-weight: bold;
+            line-height: 1;
+            margin-bottom: -0.2rem;
+        }
+
+        .subtext {
+            color: rgb(100, 100, 100);
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        /* Floating curved bottom navigation bar */
+        .floating-bar {
+            position: absolute;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px; /* Space between icons */
+            padding: 10px 20px;
+            
+            background: rgba(35, 35, 35, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Navigation button styling */
+        .nav-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border: none;
+            color: #ffed85;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 50%;
+            transition: transform 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+        }
+
+        .nav-item:hover {
+            transform: scale(1.15);
+            background-color: rgba(255, 237, 133, 0.15);
+        }
+
+        .nav-item svg {
+            width: 32px;
+            height: 32px;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="dotCanvas"></canvas>
+    
+    <div class="content">
+        <div class="main-text">banana</div>
+        <div class="subtext" id="randomQuote"></div>
+    </div>
+
+    <!-- Floating Curved Bottom Bar -->
+    <div class="floating-bar">
+        <!-- Controller Icon Button -->
+        <button class="nav-item" aria-label="Games">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="6" y1="12" x2="10" y2="12"></line>
+                <line x1="8" y1="10" x2="8" y2="14"></line>
+                <circle cx="15" cy="13" r="1" fill="currentColor"></circle>
+                <circle cx="17.5" cy="10.5" r="1" fill="currentColor"></circle>
+                <rect x="2" y="6" width="20" height="12" rx="6"></rect>
+            </svg>
+        </button>
+
+        <!-- Rounded 3x3 Dot Grid Button -->
+        <button class="nav-item" aria-label="Apps Menu">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+                <!-- Row 1 -->
+                <circle cx="5" cy="5" r="2" />
+                <circle cx="12" cy="5" r="2" />
+                <circle cx="19" cy="5" r="2" />
+                <!-- Row 2 -->
+                <circle cx="5" cy="12" r="2" />
+                <circle cx="12" cy="12" r="2" />
+                <circle cx="19" cy="12" r="2" />
+                <!-- Row 3 -->
+                <circle cx="5" cy="19" r="2" />
+                <circle cx="12" cy="19" r="2" />
+                <circle cx="19" cy="19" r="2" />
+            </svg>
+        </button>
+    </div>
+
+    <script>
+        // =========================================================
+        // LIST OF RANDOM SAYINGS
+        // =========================================================
+        const sayings = [
+            "banana is peak",
+            "tuff?",
+            "join the discord pleasee",
+            "kanel joseph is tuff",
+            "the best game site",
+            "made by murt"
+        ];
+
+        // Pick a random saying from the list and display it
+        const subtextElement = document.getElementById('randomQuote');
+        const randomIndex = Math.floor(Math.random() * sayings.length);
+        subtextElement.textContent = sayings[randomIndex];
+
+        // =========================================================
+        // CANVAS & INTERACTIVE DOT PATTERN
+        // =========================================================
+        const canvas = document.getElementById('dotCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let width, height;
+        let dots = [];
+        
+        // Grid configuration
+        const gap = 30;              // Distance between dots
+        const radius = 100;          // Distance threshold around cursor
+        const mouse = { x: -1000, y: -1000 };
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            initDots();
+        }
+
+        function initDots() {
+            dots = [];
+            for (let x = gap / 2; x < width; x += gap) {
+                for (let y = gap / 2; y < height; y += gap) {
+                    dots.push({
+                        baseX: x,
+                        baseY: y,
+                        x: x,
+                        y: y,
+                        vx: 0,
+                        vy: 0
+                    });
+                }
+            }
+        }
+
+        // Track mouse position
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+        });
+
+        // Reset mouse when off-screen
+        window.addEventListener('mouseleave', () => {
+            mouse.x = -1000;
+            mouse.y = -1000;
+        });
+
+        window.addEventListener('resize', resize);
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+
+            dots.forEach(dot => {
+                // Calculate distance from cursor
+                const dx = mouse.x - dot.x;
+                const dy = mouse.y - dot.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+
+                // Push dots away if within the interaction radius
+                if (dist < radius) {
+                    const angle = Math.atan2(dy, dx);
+                    const force = (radius - dist) / radius;
+                    const pushX = Math.cos(angle) * force * 12;
+                    const pushY = Math.sin(angle) * force * 12;
+
+                    dot.vx -= pushX;
+                    dot.vy -= pushY;
+                }
+
+                // Smooth elastic return to original grid position
+                const homeDx = dot.baseX - dot.x;
+                const homeDy = dot.baseY - dot.y;
+                
+                dot.vx += homeDx * 0.08; // Spring strength
+                dot.vy += homeDy * 0.08;
+                
+                dot.vx *= 0.75; // Friction/Damping factor
+                dot.vy *= 0.75;
+
+                dot.x += dot.vx;
+                dot.y += dot.vy;
+
+                // Draw the dot
+                ctx.beginPath();
+                ctx.arc(dot.x, dot.y, 2, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.2)'; // Subtle transparent dots
+                ctx.fill();
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        // Initialize and start animation loop
+        resize();
+        animate();
+    </script>
+
+</body>
+</html>
