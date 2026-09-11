@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Games</title>
+    <style>
+        /* Base page layout */
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgb(25, 25, 25);
+            overflow-x: hidden;
+            overflow-y: auto;
+            font-family: "Comic Sans MS", "Comic Sans", cursive, sans-serif;
+            user-select: none;
+            box-sizing: border-box;
+        }
+
+        /* Interactive Dot Canvas Background */
+        #dotCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* Header Wrapper Container */
+        .header-wrapper {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Top Header Container Spread Across Screen */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 30px;
+            padding-bottom: 10px;
+            padding-left: 300px;
+            padding-right: 300px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        /* Solid, Slightly Shorter & Thinner Divider Line */
+        .header-divider {
+            width: calc(100% - 400px);
+            height: 1.5px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            box-sizing: border-box;
+        }
+
+        /* Title (Far Left) */
+        .title {
+            color: #ffed85;
+            font-size: 3rem;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        /* Controls Group (Far Right) */
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        /* Expandable Search Bar Component */
+        .search-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            background: rgba(35, 35, 35, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 30px;
+            height: 48px;
+            width: 48px;
+            overflow: hidden;
+            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .search-container:hover,
+        .search-container:focus-within {
+            width: 280px;
+        }
+
+        .search-icon {
+            min-width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffed85;
+            pointer-events: none;
+        }
+
+        .search-icon svg {
+            width: 22px;
+            height: 22px;
+        }
+
+        .search-input {
+            width: 100%;
+            border: none;
+            background: transparent;
+            outline: none;
+            color: #ffed85;
+            font-family: inherit;
+            font-size: 1.1rem;
+            font-weight: bold;
+            padding-right: 15px;
+        }
+
+        .search-input::placeholder {
+            color: rgba(255, 237, 133, 0.5);
+            font-weight: normal;
+        }
+
+        /* Back Arrow Button */
+        .back-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(35, 35, 35, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 50%;
+            color: #ffed85;
+            width: 48px;
+            height: 48px;
+            cursor: pointer;
+            transition: transform 0.2s ease, background-color 0.2s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            flex-shrink: 0;
+        }
+
+        .back-btn:hover {
+            transform: scale(1.1);
+            background-color: rgba(255, 237, 133, 0.2);
+        }
+
+        .back-btn svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        /* =========================================================
+           GAME CARDS GRID & CARD STYLES
+           ========================================================= */
+        .games-container {
+            position: relative;
+            z-index: 10;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 24px;
+            width: calc(100% - 400px);
+            margin: 35px auto 50px auto;
+            box-sizing: border-box;
+        }
+
+        .game-card {
+            background: rgba(35, 35, 35, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            text-decoration: none;
+            cursor: pointer;
+            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), 
+                        border-color 0.25s ease, 
+                        box-shadow 0.25s ease;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+            box-sizing: border-box;
+        }
+
+        .game-card:hover {
+            transform: translateY(-6px) scale(1.02);
+            border-color: rgba(255, 237, 133, 0.5);
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.6);
+        }
+
+        /* Auto-resizes and fits any logo image without distortion */
+        .card-logo {
+            width: 100%;
+            height: 160px;
+            object-fit: contain; /* Scales picture down to fit perfectly */
+            border-radius: 10px;
+            background-color: rgba(0, 0, 0, 0.25);
+            margin-bottom: 16px;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .card-name {
+            color: #ffed85;
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin: 0 0 8px 0;
+        }
+
+        .card-description {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.95rem;
+            line-height: 1.4;
+            margin: 0;
+            font-weight: normal;
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 1200px) {
+            .header {
+                padding-left: 50px;
+                padding-right: 50px;
+            }
+            .header-divider,
+            .games-container {
+                width: calc(100% - 100px);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="dotCanvas"></canvas>
+
+    <!-- Header & Divider Wrapper -->
+    <div class="header-wrapper">
+        <header class="header">
+            <!-- Title (Left) -->
+            <div class="title">Games</div>
+
+            <!-- Controls Group (Right) -->
+            <div class="header-controls">
+                <!-- Expanding Search Bar -->
+                <div class="search-container">
+                    <div class="search-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                    </div>
+                    <input type="text" id="searchInput" class="search-input" placeholder="Search games..." />
+                </div>
+
+                <!-- Arrow Button -->
+                <button class="back-btn" onclick="history.back()" aria-label="Go back">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Refined Divider Line -->
+        <div class="header-divider"></div>
+    </div>
+
+    <!-- Game Cards Grid Container -->
+    <main class="games-container" id="gamesContainer"></main>
+
+    <script>
+        // =========================================================
+        // GAME DATA CONFIGURATION
+        // =========================================================
+        const games = [
+            {
+                name: "Gorilla Tag",
+                description: "Play as a gorilla and move with WASD. Try to tag other gorillas!",
+                file: "Games/gtag.html",
+                logo: "https://raw.githubusercontent.com/murt391/banana/main/Games/icons/gtag.png"
+            }
+        ];
+
+        // Render Game Cards Dynamically
+        const gamesContainer = document.getElementById('gamesContainer');
+
+        function renderGames(gameList) {
+            gamesContainer.innerHTML = '';
+            gameList.forEach(game => {
+                const card = document.createElement('a');
+                card.className = 'game-card';
+                card.href = game.file;
+
+                card.innerHTML = `
+                    <img class="card-logo" src="${game.logo}" alt="${game.name} Logo" loading="lazy">
+                    <h2 class="card-name">${game.name}</h2>
+                    <p class="card-description">${game.description}</p>
+                `;
+
+                gamesContainer.appendChild(card);
+            });
+        }
+
+        // Initial render
+        renderGames(games);
+
+        // Live Search Filter Functionality
+        const searchInput = document.getElementById('searchInput');
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            const filteredGames = games.filter(game => 
+                game.name.toLowerCase().includes(query) || 
+                game.description.toLowerCase().includes(query)
+            );
+            renderGames(filteredGames);
+        });
+
+        // =========================================================
+        // CANVAS & INTERACTIVE DOT PATTERN
+        // =========================================================
+        const canvas = document.getElementById('dotCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let width, height;
+        let dots = [];
+        
+        const gap = 30;
+        const radius = 100;
+        const mouse = { x: -1000, y: -1000 };
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            initDots();
+        }
+
+        function initDots() {
+            dots = [];
+            for (let x = gap / 2; x < width; x += gap) {
+                for (let y = gap / 2; y < height; y += gap) {
+                    dots.push({
+                        baseX: x,
+                        baseY: y,
+                        x: x,
+                        y: y,
+                        vx: 0,
+                        vy: 0
+                    });
+                }
+            }
+        }
+
+        window.addEventListener('mousemove', (e) => {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+        });
+
+        window.addEventListener('mouseleave', () => {
+            mouse.x = -1000;
+            mouse.y = -1000;
+        });
+
+        window.addEventListener('resize', resize);
+
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+
+            dots.forEach(dot => {
+                const dx = mouse.x - dot.x;
+                const dy = mouse.y - dot.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+
+                if (dist < radius) {
+                    const angle = Math.atan2(dy, dx);
+                    const force = (radius - dist) / radius;
+                    const pushX = Math.cos(angle) * force * 12;
+                    const pushY = Math.sin(angle) * force * 12;
+
+                    dot.vx -= pushX;
+                    dot.vy -= pushY;
+                }
+
+                const homeDx = dot.baseX - dot.x;
+                const homeDy = dot.baseY - dot.y;
+                
+                dot.vx += homeDx * 0.08;
+                dot.vy += homeDy * 0.08;
+                
+                dot.vx *= 0.75;
+                dot.vy *= 0.75;
+
+                dot.x += dot.vx;
+                dot.y += dot.vy;
+
+                ctx.beginPath();
+                ctx.arc(dot.x, dot.y, 2, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+                ctx.fill();
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        resize();
+        animate();
+    </script>
+
+</body>
+</html>
