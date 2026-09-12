@@ -29,6 +29,38 @@
             user-select: none;
         }
 
+        /* Top Bar Container for Launch Button */
+        .top-bar {
+            position: absolute;
+            top: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+        }
+
+        /* Launch in about:blank Button Styling */
+        .launch-btn {
+            background: rgba(35, 35, 35, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #ffed85;
+            padding: 10px 20px;
+            border-radius: 40px;
+            font-family: inherit;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+        }
+
+        .launch-btn:hover {
+            transform: scale(1.05);
+            background-color: rgba(45, 45, 45, 0.95);
+            border-color: rgba(255, 237, 133, 0.4);
+        }
+
         /* Position the canvas behind the text */
         #dotCanvas {
             position: absolute;
@@ -47,12 +79,32 @@
             text-align: center;
         }
 
+        /* Title Container for aligning icons with text */
+        .title-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: -0.2rem;
+        }
+
+        /* Title Favicon Styling */
+        .title-icon {
+            width: 7.5rem;
+            height: 7.5rem;
+            object-fit: contain;
+        }
+
+        /* Flipped Favicon Styling */
+        .title-icon.flipped {
+            transform: scaleX(-1);
+        }
+
         .main-text {
             color: #ffed85; /* Main text yellow */
             font-size: 7.5rem;
             font-weight: bold;
             line-height: 1;
-            margin-bottom: -0.2rem;
         }
 
         .subtext {
@@ -110,10 +162,23 @@
 </head>
 <body>
 
+    <!-- Top Button to launch in about:blank -->
+    <div class="top-bar">
+        <button class="launch-btn" onclick="launchAboutBlank()">Launch in about:blank</button>
+    </div>
+
     <canvas id="dotCanvas"></canvas>
     
     <div class="content">
-        <div class="main-text">banana</div>
+        <div class="title-container">
+            <!-- Normal Favicon (Left) -->
+            <img class="title-icon" src="https://raw.githubusercontent.com/murt391/banana/main/ico.png" alt="Banana Left Icon">
+            
+            <div class="main-text">banana</div>
+            
+            <!-- Flipped Favicon (Right) -->
+            <img class="title-icon flipped" src="https://raw.githubusercontent.com/murt391/banana/main/ico.png" alt="Banana Right Icon">
+        </div>
         <div class="subtext" id="randomQuote"></div>
     </div>
 
@@ -153,6 +218,19 @@
 
     <script>
         // =========================================================
+        // ABOUT:BLANK LAUNCHER FUNCTION
+        // =========================================================
+        function launchAboutBlank() {
+            const win = window.open('about:blank', '_blank');
+            if (win) {
+                win.document.write(document.documentElement.outerHTML);
+                win.document.close();
+            } else {
+                alert("Popup blocked! Please allow popups for this site to use this feature.");
+            }
+        }
+
+        // =========================================================
         // LIST OF RANDOM SAYINGS
         // =========================================================
         const sayings = [
@@ -161,7 +239,9 @@
             "join the discord pleasee",
             "kanel joseph is tuff",
             "the best game site",
-            "made by murt"
+            "made by murt",
+            "DO NOT DOWNLOAD TWITTER!",
+            "If you want a new website with our games, check out gn-math!"
         ];
 
         // Pick a random saying from the list and display it
