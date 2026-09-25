@@ -4,11 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Banana</title>
-    <!-- Site Icon (Favicon) -->
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/murt391/banana/main/ico.png">
     
     <style>
-        /* Fill the full screen and set the background color */
         html, body {
             margin: 0;
             padding: 0;
@@ -17,19 +15,15 @@
             background-color: rgb(25, 25, 25);
             overflow: hidden;
             
-            /* Center the text vertically and horizontally */
             display: flex;
             justify-content: center;
             align-items: center;
             
-            /* Font styling */
             font-family: "Comic Sans MS", "Comic Sans", cursive, sans-serif;
             
-            /* Prevent text selection highlighting */
             user-select: none;
         }
 
-        /* Position the canvas behind the text */
         #dotCanvas {
             position: absolute;
             top: 0;
@@ -39,15 +33,13 @@
             z-index: 1;
         }
 
-        /* Keep text container above the canvas dot background */
         .content {
             position: relative;
             z-index: 2;
-            pointer-events: none; /* Allows mouse events to pass through to canvas */
+            pointer-events: none;
             text-align: center;
         }
 
-        /* Title Container for aligning icons with text */
         .title-container {
             display: flex;
             align-items: center;
@@ -56,7 +48,6 @@
             margin-bottom: -0.2rem;
         }
 
-        /* Title Favicon Styling */
         .title-icon {
             width: 7.5rem;
             height: 7.5rem;
