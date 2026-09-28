@@ -159,13 +159,12 @@
 
 <!-- Sidebar Container -->
 <aside id="hover-sidebar">
-    <!-- Top: Site Icon -> Index -->
-    <a href="/index.html" class="sidebar-item" aria-label="Home">
+    <!-- Replace window.location.origin with your explicit site domain if needed, e.g., href="https://mysite.com/index.html" -->
+    <a href="#" onclick="window.location.href=window.location.origin + '/index.html'; return false;" class="sidebar-item" aria-label="Home">
         <img src="https://raw.githubusercontent.com/murt391/banana/main/ico.png" alt="Home" class="sidebar-icon-img">
     </a>
 
-    <!-- Middle: Games Controller Icon -> Games -->
-    <a href="/games.html" class="sidebar-item" aria-label="Games">
+    <a href="#" onclick="window.location.href=window.location.origin + '/games.html'; return false;" class="sidebar-item" aria-label="Games">
         <svg class="sidebar-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="6" y1="12" x2="10" y2="12"></line>
             <line x1="8" y1="10" x2="8" y2="14"></line>
@@ -175,8 +174,7 @@
         </svg>
     </a>
 
-    <!-- Bottom: 3x3 App Grid Icon -> Apps -->
-    <a href="/apps.html" class="sidebar-item" aria-label="Apps">
+    <a href="#" onclick="window.location.href=window.location.origin + '/apps.html'; return false;" class="sidebar-item" aria-label="Apps">
         <svg class="sidebar-icon-svg" viewBox="0 0 24 24" fill="currentColor">
             <circle cx="5" cy="5" r="2" />
             <circle cx="12" cy="5" r="2" />
@@ -306,17 +304,14 @@
         const sidebar = document.getElementById('hover-sidebar');
         const trigger = document.getElementById('sidebar-hover-trigger');
 
-        // Show sidebar when mouse hits left edge
         trigger.addEventListener('mouseenter', () => {
             sidebar.classList.add('active');
         });
 
-        // Hide sidebar when mouse leaves the sidebar area
         sidebar.addEventListener('mouseleave', () => {
             sidebar.classList.remove('active');
         });
 
-        // Extra check for mouse movement
         window.addEventListener('mousemove', (e) => {
             if (e.clientX <= 25) {
                 sidebar.classList.add('active');
