@@ -233,98 +233,89 @@
     <!-- SETTINGS INTEGRATION ENGINE -->
     <script>
         (function() {
-            // Theme presets reference
-            const themes = {
-                default: { bg: '#191919', accent: '#ffed85', text: '#ffffff' },
-                modern: { bg: '#0f172a', accent: '#38bdf8', text: '#f8fafc' },
-                midnight: { bg: '#0b132b', accent: '#6fffe9', text: '#ffffff' },
-                light: { bg: '#f1f5f9', accent: '#2563eb', text: '#0f172a' },
-                lime: { bg: '#1a2e05', accent: '#a3e635', text: '#ecfdf5' },
-                kiwi: { bg: '#14281d', accent: '#4ade80', text: '#f0fdf4' },
-                cherax: { bg: '#200010', accent: '#ff0055', text: '#ffccdf' },
-                retro: { bg: '#2b1e1a', accent: '#fb923c', text: '#fef3c7' }
-            };
+    // 1. Apply Theme Preset / Custom Colors
+    const themes = {
+        default: { bg: '#191919', accent: '#ffed85', text: '#ffffff' },
+        modern: { bg: '#0f172a', accent: '#38bdf8', text: '#f8fafc' },
+        midnight: { bg: '#0b132b', accent: '#6fffe9', text: '#ffffff' },
+        light: { bg: '#f1f5f9', accent: '#2563eb', text: '#0f172a' },
+        lime: { bg: '#1a2e05', accent: '#a3e635', text: '#ecfdf5' },
+        kiwi: { bg: '#14281d', accent: '#4ade80', text: '#f0fdf4' },
+        cherax: { bg: '#200010', accent: '#ff0055', text: '#ffccdf' },
+        retro: { bg: '#2b1e1a', accent: '#fb923c', text: '#fef3c7' }
+    };
 
-            // 1. Apply Theme from LocalStorage
-            function applyTheme() {
-                const preset = localStorage.getItem('site_theme_preset') || 'default';
-                let bg, accent, text;
+    function applyTheme() {
+        const preset = localStorage.getItem('site_theme_preset') || 'default';
+        let bg, accent, text;
 
-                if (preset !== 'custom' && themes[preset]) {
-                    bg = themes[preset].bg;
-                    accent = themes[preset].accent;
-                    text = themes[preset].text;
-                } else {
-                    bg = localStorage.getItem('site_bg') || '#191919';
-                    accent = localStorage.getItem('site_accent') || '#ffed85';
-                    text = localStorage.getItem('site_text') || '#ffffff';
-                }
+        if (preset !== 'custom' && themes[preset]) {
+            bg = themes[preset].bg;
+            accent = themes[preset].accent;
+            text = themes[preset].text;
+        } else {
+            bg = localStorage.getItem('site_bg') || '#191919';
+            accent = localStorage.getItem('site_accent') || '#ffed85';
+            text = localStorage.getItem('site_text') || '#ffffff';
+        }
 
-                document.documentElement.style.setProperty('--bg-color', bg);
-                document.documentElement.style.setProperty('--accent-color', accent);
-                document.documentElement.style.setProperty('--text-color', text);
+        document.documentElement.style.setProperty('--bg-color', bg);
+        document.documentElement.style.setProperty('--accent-color', accent);
+        document.documentElement.style.setProperty('--text-color', text);
+    }
+    applyTheme();
+
+    // 2. Global Background Audio Setup
+    let audioEl = document.getElementById('global-bg-audio');
+    if (!audioEl) {
+        audioEl = document.createElement('audio');
+        audioEl.id = 'global-bg-audio';
+        audioEl.loop = true;
+        document.body.appendChild(audioEl);
+    }
+
+    function syncAudio() {
+        const track = localStorage.getItem('site_active_music');
+        const rawVolume = localStorage.getItem('site_music_volume');
+        const volume = rawVolume !== null ? parseFloat(rawVolume) : 0.8;
+
+        // Ensure volume updates immediately
+        audioEl.volume = Math.max(0, Math.min(1, volume));
+
+        if (track && track !== 'none') {
+            if (audioEl.src !== window.location.origin + '/' + track && audioEl.src !== track) {
+                audioEl.src = track;
+                audioEl.play().catch(() => {
+                    const startAudio = () => {
+                        audioEl.play();
+                        window.removeEventListener('click', startAudio);
+                        window.removeEventListener('keydown', startAudio);
+                    };
+                    window.addEventListener('click', startAudio);
+                    window.addEventListener('keydown', startAudio);
+                });
             }
-            applyTheme();
+        } else {
+            audioEl.pause();
+            audioEl.src = '';
+        }
+    }
+    syncAudio();
 
-            // 2. Apply Custom Main Text
-            const customMain = localStorage.getItem('site_main_text');
-            const mainTitleEl = document.getElementById('mainTitle');
-            if (customMain && mainTitleEl) {
-                mainTitleEl.textContent = customMain;
-            }
+    // 3. Listen for Storage Changes Across Tabs/Pages
+    window.addEventListener('storage', (e) => {
+        applyTheme();
+        syncAudio();
+    });
 
-            // 3. Audio Controller Engine
-            let audioEl = document.getElementById('global-bg-audio');
-            if (!audioEl) {
-                audioEl = document.createElement('audio');
-                audioEl.id = 'global-bg-audio';
-                audioEl.loop = true;
-                document.body.appendChild(audioEl);
-            }
-
-            function syncAudio() {
-                const track = localStorage.getItem('site_active_music');
-                const rawVolume = localStorage.getItem('site_music_volume');
-                const volume = rawVolume !== null ? parseFloat(rawVolume) : 0.8;
-
-                audioEl.volume = Math.max(0, Math.min(1, volume));
-
-                if (track && track !== 'none') {
-                    if (audioEl.src !== track) {
-                        audioEl.src = track;
-                        audioEl.play().catch(() => {
-                            const startAudio = () => {
-                                audioEl.play();
-                                window.removeEventListener('click', startAudio);
-                                window.removeEventListener('keydown', startAudio);
-                            };
-                            window.addEventListener('click', startAudio);
-                            window.addEventListener('keydown', startAudio);
-                        });
-                    }
-                } else {
-                    audioEl.pause();
-                    audioEl.src = '';
-                }
-            }
-            syncAudio();
-
-            // Live updates across tabs
-            window.addEventListener('storage', () => {
-                applyTheme();
-                syncAudio();
-                const updatedMain = localStorage.getItem('site_main_text');
-                if (updatedMain && mainTitleEl) mainTitleEl.textContent = updatedMain;
-            });
-
-            // 4. Emergency Panic Key Listener
-            window.addEventListener('keydown', (e) => {
-                const panicKey = localStorage.getItem('site_panic_key');
-                if (panicKey && panicKey !== 'None' && e.key === panicKey) {
-                    window.location.href = 'https://www.google.com';
-                }
-            });
-        })();
+    // 4. Panic Key Handler
+    window.addEventListener('keydown', (e) => {
+        const panicKey = localStorage.getItem('site_panic_key');
+        if (panicKey && panicKey !== 'None' && e.key === panicKey) {
+            window.location.href = 'https://www.google.com';
+        }
+    });
+})();
     </script>
 
     <!-- UI & CANVAS ANIMATION SCRIPT -->
