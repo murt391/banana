@@ -118,9 +118,7 @@
             height: 24px;
         }
 
-        /* =========================================================
-           SETTINGS CONTAINER & CARDS
-           ========================================================= */
+        /* Settings Container & Cards */
         .settings-container {
             position: relative;
             z-index: 10;
@@ -175,13 +173,13 @@
         }
 
         /* Form Controls */
-        select, input[type="text"], button.action-btn {
+        select, input[type="text"] {
             background: rgba(20, 20, 20, 0.8);
             border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 8px;
             color: var(--accent-color, #ffed85);
             font-family: inherit;
-            font-size: 1rem;
+            font-size: 0.95rem;
             padding: 10px 14px;
             outline: none;
             cursor: pointer;
@@ -204,6 +202,7 @@
         /* Custom Range Slider */
         input[type="range"] {
             -webkit-appearance: none;
+            appearance: none;
             width: 200px;
             height: 8px;
             background: rgba(255, 255, 255, 0.2);
@@ -213,6 +212,7 @@
 
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
+            appearance: none;
             width: 20px;
             height: 20px;
             border-radius: 50%;
@@ -231,7 +231,57 @@
             gap: 12px;
         }
 
-        /* Responsive Breakpoints */
+        /* Custom Drag & Drop Zone */
+        .drop-zone {
+            width: 100%;
+            border: 2px dashed rgba(255, 255, 255, 0.25);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            background: rgba(20, 20, 20, 0.5);
+            cursor: pointer;
+            transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .drop-zone:hover, .drop-zone.dragover {
+            border-color: var(--accent-color, #ffed85);
+            background: rgba(255, 237, 133, 0.08);
+            transform: translateY(-2px);
+        }
+
+        .drop-zone svg {
+            width: 32px;
+            height: 32px;
+            stroke: var(--accent-color, #ffed85);
+        }
+
+        .drop-zone-text {
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        .drop-zone-subtext {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .file-status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 237, 133, 0.15);
+            color: var(--accent-color, #ffed85);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin-top: 6px;
+        }
+
         @media (max-width: 1200px) {
             .header {
                 padding-left: 50px;
@@ -256,7 +306,6 @@
             </div>
 
             <div class="header-controls">
-                <!-- Back Arrow Button -> Redirects to index.html -->
                 <a href="index.html" aria-label="Go to home page">
                     <button class="icon-btn" type="button">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -284,15 +333,15 @@
                     <div class="setting-description">Select a pre-made color scheme</div>
                 </div>
                 <select id="themeSelect">
-                    <option value="default">Default Dark</option>
-                    <option value="modern">Modern Slate</option>
-                    <option value="midnight">Midnight Neon</option>
-                    <option value="light">Bright Light</option>
-                    <option value="lime">Lime Cyber</option>
-                    <option value="kiwi">Kiwi Green</option>
-                    <option value="cherax">Cherax Pink</option>
-                    <option value="retro">Retro Orange</option>
-                    <option value="custom">Custom Colors</option>
+                    <option value="default">Default</option>
+                    <option value="modern">Modern</option>
+                    <option value="midnight">Midnight</option>
+                    <option value="light">Light</option>
+                    <option value="lime">Lime</option>
+                    <option value="kiwi">Kiwi</option>
+                    <option value="cherax">Cherax</option>
+                    <option value="retro">Retro</option>
+                    <option value="custom">Custom</option>
                 </select>
             </div>
 
@@ -315,14 +364,30 @@
             <div class="setting-row">
                 <div>
                     <div class="setting-label">Background Music</div>
-                    <div class="setting-description">Choose ambient audio track</div>
+                    <div class="setting-description">Choose ambient audio track or upload custom file</div>
                 </div>
                 <select id="musicSelect">
                     <option value="none">None</option>
-                    <option value="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3">Track 1 - Chill Synth</option>
-                    <option value="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3">Track 2 - Ambient Pulse</option>
-                    <option value="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3">Track 3 - Low Frequency</option>
+                    <option value="https://raw.githubusercontent.com/murt391/banana/main/Music/lapeace.mp3">La Peace FUNK</option>
+                    <option value="https://raw.githubusercontent.com/murt391/banana/main/Music/elapeida.mp3">Ela Peida FUNK</option>
+                    <option value="custom">Custom Audio File</option>
                 </select>
+            </div>
+
+            <!-- Enhanced Custom Drag & Drop Container -->
+            <div id="customFileContainer" style="display: none; flex-direction: column; gap: 8px;">
+                <div class="setting-label">Upload Audio File</div>
+                <div class="drop-zone" id="dropZone">
+                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    <div class="drop-zone-text">Drag & drop your audio file here, or <span style="color: var(--accent-color, #ffed85); text-decoration: underline;">browse</span></div>
+                    <div class="drop-zone-subtext">Supports MP3, WAV, OGG, or FLAC</div>
+                    <div id="fileStatus" class="file-status-badge" style="display: none;"></div>
+                </div>
+                <input type="file" id="customAudioFile" accept="audio/*" style="display: none;">
             </div>
 
             <div class="setting-row">
@@ -354,7 +419,6 @@
     <!-- SETTINGS ENGINE & CONTROLLER -->
     <script>
         (function() {
-            // Theme Definitions
             const themes = {
                 default: { bg: '#191919', accent: '#ffed85', text: '#ffffff' },
                 modern: { bg: '#0f172a', accent: '#38bdf8', text: '#f8fafc' },
@@ -372,11 +436,14 @@
             const accentColorPicker = document.getElementById('accentColorPicker');
 
             const musicSelect = document.getElementById('musicSelect');
+            const customFileContainer = document.getElementById('customFileContainer');
+            const customAudioFile = document.getElementById('customAudioFile');
+            const dropZone = document.getElementById('dropZone');
+            const fileStatus = document.getElementById('fileStatus');
             const volumeSlider = document.getElementById('volumeSlider');
             const volumeValue = document.getElementById('volumeValue');
             const panicKeyInput = document.getElementById('panicKeyInput');
 
-            // Apply theme dynamically
             function applyTheme(preset) {
                 let bg, accent, text;
 
@@ -400,13 +467,24 @@
                 accentColorPicker.value = accent;
             }
 
-            // Initialize Page Form State
+            // Load Saved Values
             const savedTheme = localStorage.getItem('site_theme_preset') || 'default';
             themeSelect.value = savedTheme;
             applyTheme(savedTheme);
 
             const savedMusic = localStorage.getItem('site_active_music') || 'none';
-            musicSelect.value = savedMusic;
+            if (savedMusic.startsWith('data:audio') || savedMusic === 'custom') {
+                musicSelect.value = 'custom';
+                customFileContainer.style.display = 'flex';
+                const savedName = localStorage.getItem('site_custom_audio_name');
+                if (savedName) {
+                    fileStatus.textContent = 'Loaded: ' + savedName;
+                    fileStatus.style.display = 'inline-flex';
+                }
+            } else {
+                musicSelect.value = savedMusic;
+                customFileContainer.style.display = 'none';
+            }
 
             const savedVolume = localStorage.getItem('site_music_volume') !== null ? localStorage.getItem('site_music_volume') : '0.8';
             volumeSlider.value = savedVolume;
@@ -441,7 +519,7 @@
             }
             syncAudio();
 
-            // Event Listeners for Theme
+            // Theme Events
             themeSelect.addEventListener('change', (e) => {
                 const val = e.target.value;
                 localStorage.setItem('site_theme_preset', val);
@@ -460,12 +538,69 @@
                 applyTheme('custom');
             });
 
-            // Event Listeners for Audio & Volume Slider
+            // Music Events
             musicSelect.addEventListener('change', (e) => {
-                localStorage.setItem('site_active_music', e.target.value);
-                syncAudio();
+                const val = e.target.value;
+                if (val === 'custom') {
+                    customFileContainer.style.display = 'flex';
+                    const customTrack = localStorage.getItem('site_custom_audio_data');
+                    if (customTrack) {
+                        localStorage.setItem('site_active_music', customTrack);
+                        syncAudio();
+                    }
+                } else {
+                    customFileContainer.style.display = 'none';
+                    localStorage.setItem('site_active_music', val);
+                    syncAudio();
+                }
             });
 
+            // File Processing Handler
+            function processAudioFile(file) {
+                if (!file || !file.type.startsWith('audio/')) return;
+                
+                fileStatus.textContent = 'Uploading: ' + file.name;
+                fileStatus.style.display = 'inline-flex';
+
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const base64Audio = event.target.result;
+                    localStorage.setItem('site_custom_audio_data', base64Audio);
+                    localStorage.setItem('site_custom_audio_name', file.name);
+                    localStorage.setItem('site_active_music', base64Audio);
+                    fileStatus.textContent = 'Active: ' + file.name;
+                    syncAudio();
+                };
+                reader.readAsDataURL(file);
+            }
+
+            // Drag and Drop Events
+            dropZone.addEventListener('click', () => customAudioFile.click());
+
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('dragover');
+            });
+
+            ['dragleave', 'dragend'].forEach(type => {
+                dropZone.addEventListener(type, () => dropZone.classList.remove('dragover'));
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('dragover');
+                if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                    processAudioFile(e.dataTransfer.files[0]);
+                }
+            });
+
+            customAudioFile.addEventListener('change', (e) => {
+                if (e.target.files && e.target.files[0]) {
+                    processAudioFile(e.target.files[0]);
+                }
+            });
+
+            // Volume Slider Event
             volumeSlider.addEventListener('input', (e) => {
                 const val = e.target.value;
                 localStorage.setItem('site_music_volume', val);
@@ -475,7 +610,7 @@
                 }
             });
 
-            // Panic Key Input Handler
+            // Panic Key Handler
             panicKeyInput.addEventListener('keydown', (e) => {
                 e.preventDefault();
                 const key = e.key === 'Escape' ? 'None' : e.key;
@@ -483,7 +618,6 @@
                 localStorage.setItem('site_panic_key', key);
             });
 
-            // Global Keydown Panic Listener
             window.addEventListener('keydown', (e) => {
                 const panicKey = localStorage.getItem('site_panic_key');
                 if (panicKey && panicKey !== 'None' && e.key === panicKey) {
@@ -493,7 +627,7 @@
         })();
     </script>
 
-    <!-- CANVAS & INTERACTIVE DOT PATTERN (Identical to index.html) -->
+    <!-- Interactive Canvas Dot Background -->
     <script>
         const canvas = document.getElementById('dotCanvas');
         const ctx = canvas.getContext('2d');
