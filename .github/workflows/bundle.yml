@@ -1,35 +1,41 @@
-name: Bundle Site into Single File
+name: Automated Mega Bundle
 
 on:
   push:
     branches:
-      - main # Runs every time you push changes to your main branch
+      - main # Triggers compilation every time you push edits to main
 
 permissions:
-  contents: write # Allows GitHub to save the compiled file back to your repo
+  contents: write
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository code
+      - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Set up Node.js environment
-        uses: actions/setup-node@v4
+      - name: Set up Python Environment
+        uses: actions/setup-python@v5
         with:
-          node-node-version: 20
+          python-version: '3.10'
 
-      - name: Install Bundler Tool
-        run: npm install -g inliner
+      - name: Install Python Requirements
+        run: pip install beautifulsoup4
 
-      - name: Combine HTML and PNGs into One File
+      - name: Run Script to Auto-Merge 173 Pages
+        run: python bundle.py
+
+      - name: Preserve Custom Domain CNAME
         run: |
-          mkdir dist
-          inliner index.html > dist/index.html
+          if [ -f CNAME ]; then
+            cp CNAME dist/CNAME
+          else
+            echo "bananaubg.com" > dist/CNAME
+          fi
 
       - name: Deploy Single File to GitHub Pages Branch
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: dist # Uploads only the single bundled file
-          branch: gh-pages # Pushes it safely to a separate deployment branch
+          folder: dist
+          branch: gh-pages
