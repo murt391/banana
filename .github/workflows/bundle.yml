@@ -1,0 +1,35 @@
+name: Bundle Site into Single File
+
+on:
+  push:
+    branches:
+      - main # Runs every time you push changes to your main branch
+
+permissions:
+  contents: write # Allows GitHub to save the compiled file back to your repo
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js environment
+        uses: actions/setup-node@v4
+        with:
+          node-node-version: 20
+
+      - name: Install Bundler Tool
+        run: npm install -g inliner
+
+      - name: Combine HTML and PNGs into One File
+        run: |
+          mkdir dist
+          inliner index.html > dist/index.html
+
+      - name: Deploy Single File to GitHub Pages Branch
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: dist # Uploads only the single bundled file
+          branch: gh-pages # Pushes it safely to a separate deployment branch
