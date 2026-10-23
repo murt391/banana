@@ -3,7 +3,7 @@ name: Automated Mega Bundle
 on:
   push:
     branches:
-      - main # Triggers compilation every time you push edits to main
+      - main
 
 permissions:
   contents: write
@@ -15,16 +15,46 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Set up Python Environment
-        uses: actions/setup-python@v5
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
-          python-version: '3.10'
+          node-version: 20
 
-      - name: Install Python Requirements
-        run: pip install beautifulsoup4
+      - name: Install Bundler Tools
+        run: npm install -g inliner juice
 
-      - name: Run Script to Auto-Merge 173 Pages
-        run: python bundle.py
+      - name: Combine All 173 Pages and Images
+        run: |
+          mkdir dist
+          
+          # 1. Create a clean base file
+          echo '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Banana UBG</title><style>.auto-page { display: none; } .auto-page.active { display: block; }</style></head><body>' > dist/raw_combine.html
+          
+          # 2. Inject navigation control script
+          echo '<script>function switchAutoPage(p){document.querySelectorAll(".auto-page").forEach(s=>s.classList.remove("active"));const t=document.getElementById(p);if(t){t.classList.add("active");window.scrollTo(0,0);}}</script>' >> dist/raw_combine.html
+          
+          # 3. Pack original homepage as the main view
+          if [ -f index.html ]; then
+            echo '<section id="index.html" class="auto-page active">' >> dist/raw_combine.html
+            cat index.html >> dist/raw_combine.html
+            echo '</section>' >> dist/raw_combine.html
+          fi
+          
+          # 4. Loop through and inject all other 172 HTML files into their own sections
+          find . -type f -name "*.html" ! -name "index.html" ! -path "./dist/*" | while read -r file; do
+            clean_id=$(echo "$file" | sed 's|^\./||')
+            echo "<section id=\"$clean_id\" class=\"auto-page\">" >> dist/raw_combine.html
+            cat "$file" >> dist/raw_combine.html
+            echo "</section>" >> dist/raw_combine.html
+          done
+          
+          echo '</body></html>' >> dist/raw_combine.html
+          
+          # 5. Fix navigation links to handle section shifting
+          sed -i -E 's/href="([^"#\:]+\.html)"/href="#" onclick="switchAutoPage(\'\1\'); return false;"/g' dist/raw_combine.html
+          
+          # 6. Bake all images directly into the HTML as text
+          inliner dist/raw_combine.html > dist/index.html
 
       - name: Preserve Custom Domain CNAME
         run: |
