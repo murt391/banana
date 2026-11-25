@@ -35,15 +35,13 @@
             position: fixed;
             top: 29px;
             left: 0;
-            right: 95px; /* Leaves clean spacing before the settings icon */
+            right: 95px;
             height: 44px;
             z-index: 9;
             display: flex;
             align-items: center;
             overflow: hidden;
             pointer-events: none;
-
-            /* Fades smoothly at the left screen edge and right before the settings button */
             -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
             mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
         }
@@ -54,7 +52,6 @@
             color: var(--accent-color, #ffed85);
             font-size: 1.35rem;
             font-weight: bold;
-            /* 25s total cycle: starts immediately, scrolls for 20s, pauses 5s at the end */
             animation: slideLeftWithPause 25s linear infinite;
         }
 
@@ -99,13 +96,12 @@
             object-fit: contain;
         }
 
-        /* Flipped Favicon Styling */
         .title-icon.flipped {
             transform: scaleX(-1);
         }
 
         .main-text {
-            color: var(--accent-color, #ffed85); /* Accent color preset or custom */
+            color: var(--accent-color, #ffed85);
             font-size: 7.5rem;
             font-weight: bold;
             line-height: 1;
@@ -117,7 +113,6 @@
             font-weight: bold;
         }
 
-        /* Top Right Settings Button Styling */
         .top-settings-btn {
             position: fixed;
             top: 25px;
@@ -152,7 +147,6 @@
             height: 26px;
         }
 
-        /* Floating curved bottom navigation bar */
         .floating-bar {
             position: absolute;
             bottom: 25px;
@@ -163,7 +157,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 12px; /* Space between icons */
+            gap: 12px;
             padding: 10px 20px;
             
             background: rgba(35, 35, 35, 0.85);
@@ -174,7 +168,6 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
 
-        /* Navigation button styling */
         .nav-item {
             display: flex;
             align-items: center;
@@ -204,8 +197,8 @@
     <canvas id="dotCanvas"></canvas>
 
     <!-- Top Announcement Bar -->
-    <div class="announcement-bar">
-        <div class="announcement-text">new update soon! also first time trying out announcement system.</div>
+    <div class="announcement-bar" id="announcementBar">
+        <div class="announcement-text" id="announcementTextDisplay"></div>
     </div>
 
     <!-- Top Right Settings Icon -->
@@ -218,20 +211,16 @@
     
     <div class="content">
         <div class="title-container">
-            <!-- Normal Favicon (Left) -->
             <img class="title-icon" src="https://raw.githubusercontent.com/murt391/banana/main/ico.png" alt="Banana Left Icon">
             
             <div class="main-text" id="mainTitle">banana</div>
             
-            <!-- Flipped Favicon (Right) -->
             <img class="title-icon flipped" src="https://raw.githubusercontent.com/murt391/banana/main/ico.png" alt="Banana Right Icon">
         </div>
         <div class="subtext" id="randomQuote"></div>
     </div>
 
-    <!-- Floating Curved Bottom Bar -->
     <div class="floating-bar">
-        <!-- Controller Icon Button -->
         <a href="games.html" aria-label="Games" style="text-decoration: none;">
             <button class="nav-item" aria-label="Games">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -244,19 +233,15 @@
             </button>
         </a>
 
-        <!-- Rounded 3x3 Dot Grid Button -->
         <a href="apps.html" aria-label="Apps" style="text-decoration: none;">
             <button class="nav-item" aria-label="Apps Menu">
                 <svg viewBox="0 0 24 24" fill="currentColor">
-                    <!-- Row 1 -->
                     <circle cx="5" cy="5" r="2" />
                     <circle cx="12" cy="5" r="2" />
                     <circle cx="19" cy="5" r="2" />
-                    <!-- Row 2 -->
                     <circle cx="5" cy="12" r="2" />
                     <circle cx="12" cy="12" r="2" />
                     <circle cx="19" cy="12" r="2" />
-                    <!-- Row 3 -->
                     <circle cx="5" cy="19" r="2" />
                     <circle cx="12" cy="19" r="2" />
                     <circle cx="19" cy="19" r="2" />
@@ -264,7 +249,6 @@
             </button>
         </a>
 
-        <!-- Discord Icon Button -->
         <a href="https://discord.gg/vzbAbByvrp" target="_blank" rel="noopener noreferrer" aria-label="Discord" style="text-decoration: none;">
             <button class="nav-item" aria-label="Discord">
                 <svg viewBox="0 0 24 24" fill="currentColor">
@@ -274,9 +258,12 @@
         </a>
     </div>
 
-    <!-- SETTINGS INTEGRATION ENGINE -->
+    <!-- SETTINGS & ANNOUNCEMENT INTEGRATION ENGINE -->
     <script>
         (function() {
+            // ---> CHANGE YOUR GLOBAL ANNOUNCEMENT TEXT HERE <---
+            const GLOBAL_ANNOUNCEMENT = "new update soon! also first time trying out the announcement system.";
+
             const themes = {
                 default: { bg: '#191919', accent: '#ffed85', text: '#ffffff' },
                 modern: { bg: '#0f172a', accent: '#38bdf8', text: '#f8fafc' },
@@ -307,6 +294,16 @@
                 document.documentElement.style.setProperty('--text-color', text);
             }
             applyTheme();
+
+            // Setup Announcement Bar & Toggle
+            const announcementBar = document.getElementById('announcementBar');
+            const announcementTextDisplay = document.getElementById('announcementTextDisplay');
+            
+            announcementTextDisplay.textContent = GLOBAL_ANNOUNCEMENT;
+
+            const savedAnnouncementState = localStorage.getItem('site_announcement_enabled');
+            const isAnnouncementOn = savedAnnouncementState === null ? true : (savedAnnouncementState === 'true');
+            announcementBar.style.display = (isAnnouncementOn && GLOBAL_ANNOUNCEMENT !== "") ? 'flex' : 'none';
 
             let audioEl = document.getElementById('global-bg-audio');
             if (!audioEl) {
@@ -346,6 +343,11 @@
             window.addEventListener('storage', (e) => {
                 applyTheme();
                 syncAudio();
+
+                if (e.key === 'site_announcement_enabled') {
+                    const enabled = e.newValue === 'true';
+                    announcementBar.style.display = (enabled && GLOBAL_ANNOUNCEMENT !== "") ? 'flex' : 'none';
+                }
             });
 
             window.addEventListener('keydown', (e) => {
