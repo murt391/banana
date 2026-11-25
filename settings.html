@@ -561,14 +561,6 @@
             themeSelect.value = savedTheme;
             applyTheme(savedTheme);
 
-            // Display global text
-            announcementTextDisplay.textContent = GLOBAL_ANNOUNCEMENT;
-
-            const savedAnnouncementState = localStorage.getItem('site_announcement_enabled');
-            const isAnnouncementOn = savedAnnouncementState === null ? true : (savedAnnouncementState === 'true');
-            announcementToggle.checked = isAnnouncementOn;
-            announcementBar.style.display = (isAnnouncementOn && GLOBAL_ANNOUNCEMENT !== "") ? 'flex' : 'none';
-
             const savedMusic = localStorage.getItem('site_active_music') || 'none';
             if (savedMusic.startsWith('data:audio') || savedMusic === 'custom') {
                 musicSelect.value = 'custom';
