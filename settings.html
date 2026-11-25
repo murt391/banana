@@ -35,6 +35,45 @@
             pointer-events: none;
         }
 
+        /* Announcement Ticker Styling */
+        .announcement-bar {
+            position: fixed;
+            top: 29px;
+            left: 0;
+            right: 95px; /* Leaves clean spacing before the settings icon */
+            height: 44px;
+            z-index: 9;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+            pointer-events: none;
+
+            /* Fades smoothly at the left screen edge and right before the back/settings button */
+            -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+            mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+        }
+
+        .announcement-text {
+            position: absolute;
+            white-space: nowrap;
+            color: var(--accent-color, #ffed85);
+            font-size: 1.35rem;
+            font-weight: bold;
+            /* 25s total cycle: starts immediately, scrolls for 20s, pauses 5s at the end */
+            animation: slideLeftWithPause 25s linear infinite;
+        }
+
+        @keyframes slideLeftWithPause {
+            0% {
+                left: 100%;
+                transform: translateX(0%);
+            }
+            80%, 100% {
+                left: 0%;
+                transform: translateX(-100%);
+            }
+        }
+
         /* Header Wrapper Container */
         .header-wrapper {
             position: relative;
@@ -172,6 +211,53 @@
             margin-top: 4px;
         }
 
+        /* Custom Toggle Switch */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 54px;
+            height: 28px;
+            flex-shrink: 0;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(255, 255, 255, 0.2);
+            transition: 0.3s;
+            border-radius: 28px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: #ffffff;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--accent-color, #ffed85);
+            border-color: var(--accent-color, #ffed85);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+            background-color: #191919;
+        }
+
         /* Form Controls */
         select, input[type="text"] {
             background: rgba(20, 20, 20, 0.8);
@@ -298,6 +384,11 @@
 
     <canvas id="dotCanvas"></canvas>
 
+    <!-- Top Announcement Bar -->
+    <div class="announcement-bar" id="announcementBar">
+        <div class="announcement-text">new update soon! also first time trying out announcement system.</div>
+    </div>
+
     <!-- Header Wrapper -->
     <div class="header-wrapper">
         <header class="header">
@@ -354,6 +445,18 @@
                     <span class="setting-label">Accent Color</span>
                     <input type="color" id="accentColorPicker" value="#ffed85">
                 </div>
+            </div>
+
+            <!-- Announcement Toggle Row -->
+            <div class="setting-row" style="margin-top: 6px;">
+                <div>
+                    <div class="setting-label">Announcement Banner</div>
+                    <div class="setting-description">Show or hide the scrolling announcement bar</div>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" id="announcementToggle" checked>
+                    <span class="slider"></span>
+                </label>
             </div>
         </div>
 
@@ -434,6 +537,8 @@
             const customColorPicker = document.getElementById('customColorPicker');
             const bgColorPicker = document.getElementById('bgColorPicker');
             const accentColorPicker = document.getElementById('accentColorPicker');
+            const announcementToggle = document.getElementById('announcementToggle');
+            const announcementBar = document.getElementById('announcementBar');
 
             const musicSelect = document.getElementById('musicSelect');
             const customFileContainer = document.getElementById('customFileContainer');
@@ -471,6 +576,11 @@
             const savedTheme = localStorage.getItem('site_theme_preset') || 'default';
             themeSelect.value = savedTheme;
             applyTheme(savedTheme);
+
+            const savedAnnouncementState = localStorage.getItem('site_announcement_enabled');
+            const isAnnouncementOn = savedAnnouncementState === null ? true : (savedAnnouncementState === 'true');
+            announcementToggle.checked = isAnnouncementOn;
+            announcementBar.style.display = isAnnouncementOn ? 'flex' : 'none';
 
             const savedMusic = localStorage.getItem('site_active_music') || 'none';
             if (savedMusic.startsWith('data:audio') || savedMusic === 'custom') {
@@ -536,6 +646,13 @@
                 localStorage.setItem('site_theme_preset', 'custom');
                 localStorage.setItem('site_accent', e.target.value);
                 applyTheme('custom');
+            });
+
+            // Announcement Toggle Event
+            announcementToggle.addEventListener('change', (e) => {
+                const enabled = e.target.checked;
+                localStorage.setItem('site_announcement_enabled', enabled);
+                announcementBar.style.display = enabled ? 'flex' : 'none';
             });
 
             // Music Events
