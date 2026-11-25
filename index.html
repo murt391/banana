@@ -30,6 +30,45 @@
             transition: background-color 0.3s ease, color 0.3s ease;
         }
 
+        /* Announcement Ticker Styling */
+        .announcement-bar {
+            position: fixed;
+            top: 29px;
+            left: 0;
+            right: 95px; /* Leaves clean spacing before the settings icon */
+            height: 44px;
+            z-index: 9;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+            pointer-events: none;
+
+            /* Fades smoothly at the left screen edge and right before the settings button */
+            -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+            mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+        }
+
+        .announcement-text {
+            position: absolute;
+            white-space: nowrap;
+            color: var(--accent-color, #ffed85);
+            font-size: 1.35rem;
+            font-weight: bold;
+            /* 25s total cycle: starts immediately, scrolls for 20s, pauses 5s at the end */
+            animation: slideLeftWithPause 25s linear infinite;
+        }
+
+        @keyframes slideLeftWithPause {
+            0% {
+                left: 100%;
+                transform: translateX(0%);
+            }
+            80%, 100% {
+                left: 0%;
+                transform: translateX(-100%);
+            }
+        }
+
         #dotCanvas {
             position: absolute;
             top: 0;
@@ -164,6 +203,11 @@
 
     <canvas id="dotCanvas"></canvas>
 
+    <!-- Top Announcement Bar -->
+    <div class="announcement-bar">
+        <div class="announcement-text">new update soon! also first time trying out announcement system.</div>
+    </div>
+
     <!-- Top Right Settings Icon -->
     <a href="settings.html" class="top-settings-btn" aria-label="Settings">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -233,94 +277,88 @@
     <!-- SETTINGS INTEGRATION ENGINE -->
     <script>
         (function() {
-    // 1. Apply Theme Preset / Custom Colors
-    const themes = {
-        default: { bg: '#191919', accent: '#ffed85', text: '#ffffff' },
-        modern: { bg: '#0f172a', accent: '#38bdf8', text: '#f8fafc' },
-        midnight: { bg: '#0b132b', accent: '#6fffe9', text: '#ffffff' },
-        light: { bg: '#f1f5f9', accent: '#2563eb', text: '#0f172a' },
-        lime: { bg: '#1a2e05', accent: '#a3e635', text: '#ecfdf5' },
-        kiwi: { bg: '#14281d', accent: '#4ade80', text: '#f0fdf4' },
-        cherax: { bg: '#200010', accent: '#ff0055', text: '#ffccdf' },
-        retro: { bg: '#2b1e1a', accent: '#fb923c', text: '#fef3c7' }
-    };
+            const themes = {
+                default: { bg: '#191919', accent: '#ffed85', text: '#ffffff' },
+                modern: { bg: '#0f172a', accent: '#38bdf8', text: '#f8fafc' },
+                midnight: { bg: '#0b132b', accent: '#6fffe9', text: '#ffffff' },
+                light: { bg: '#f1f5f9', accent: '#2563eb', text: '#0f172a' },
+                lime: { bg: '#1a2e05', accent: '#a3e635', text: '#ecfdf5' },
+                kiwi: { bg: '#14281d', accent: '#4ade80', text: '#f0fdf4' },
+                cherax: { bg: '#200010', accent: '#ff0055', text: '#ffccdf' },
+                retro: { bg: '#2b1e1a', accent: '#fb923c', text: '#fef3c7' }
+            };
 
-    function applyTheme() {
-        const preset = localStorage.getItem('site_theme_preset') || 'default';
-        let bg, accent, text;
+            function applyTheme() {
+                const preset = localStorage.getItem('site_theme_preset') || 'default';
+                let bg, accent, text;
 
-        if (preset !== 'custom' && themes[preset]) {
-            bg = themes[preset].bg;
-            accent = themes[preset].accent;
-            text = themes[preset].text;
-        } else {
-            bg = localStorage.getItem('site_bg') || '#191919';
-            accent = localStorage.getItem('site_accent') || '#ffed85';
-            text = localStorage.getItem('site_text') || '#ffffff';
-        }
+                if (preset !== 'custom' && themes[preset]) {
+                    bg = themes[preset].bg;
+                    accent = themes[preset].accent;
+                    text = themes[preset].text;
+                } else {
+                    bg = localStorage.getItem('site_bg') || '#191919';
+                    accent = localStorage.getItem('site_accent') || '#ffed85';
+                    text = localStorage.getItem('site_text') || '#ffffff';
+                }
 
-        document.documentElement.style.setProperty('--bg-color', bg);
-        document.documentElement.style.setProperty('--accent-color', accent);
-        document.documentElement.style.setProperty('--text-color', text);
-    }
-    applyTheme();
-
-    // 2. Global Background Audio Setup
-    let audioEl = document.getElementById('global-bg-audio');
-    if (!audioEl) {
-        audioEl = document.createElement('audio');
-        audioEl.id = 'global-bg-audio';
-        audioEl.loop = true;
-        document.body.appendChild(audioEl);
-    }
-
-    function syncAudio() {
-        const track = localStorage.getItem('site_active_music');
-        const rawVolume = localStorage.getItem('site_music_volume');
-        const volume = rawVolume !== null ? parseFloat(rawVolume) : 0.8;
-
-        // Ensure volume updates immediately
-        audioEl.volume = Math.max(0, Math.min(1, volume));
-
-        if (track && track !== 'none') {
-            if (audioEl.src !== window.location.origin + '/' + track && audioEl.src !== track) {
-                audioEl.src = track;
-                audioEl.play().catch(() => {
-                    const startAudio = () => {
-                        audioEl.play();
-                        window.removeEventListener('click', startAudio);
-                        window.removeEventListener('keydown', startAudio);
-                    };
-                    window.addEventListener('click', startAudio);
-                    window.addEventListener('keydown', startAudio);
-                });
+                document.documentElement.style.setProperty('--bg-color', bg);
+                document.documentElement.style.setProperty('--accent-color', accent);
+                document.documentElement.style.setProperty('--text-color', text);
             }
-        } else {
-            audioEl.pause();
-            audioEl.src = '';
-        }
-    }
-    syncAudio();
+            applyTheme();
 
-    // 3. Listen for Storage Changes Across Tabs/Pages
-    window.addEventListener('storage', (e) => {
-        applyTheme();
-        syncAudio();
-    });
+            let audioEl = document.getElementById('global-bg-audio');
+            if (!audioEl) {
+                audioEl = document.createElement('audio');
+                audioEl.id = 'global-bg-audio';
+                audioEl.loop = true;
+                document.body.appendChild(audioEl);
+            }
 
-    // 4. Panic Key Handler
-    window.addEventListener('keydown', (e) => {
-        const panicKey = localStorage.getItem('site_panic_key');
-        if (panicKey && panicKey !== 'None' && e.key === panicKey) {
-            window.location.href = 'https://www.google.com';
-        }
-    });
-})();
+            function syncAudio() {
+                const track = localStorage.getItem('site_active_music');
+                const rawVolume = localStorage.getItem('site_music_volume');
+                const volume = rawVolume !== null ? parseFloat(rawVolume) : 0.8;
+
+                audioEl.volume = Math.max(0, Math.min(1, volume));
+
+                if (track && track !== 'none') {
+                    if (audioEl.src !== window.location.origin + '/' + track && audioEl.src !== track) {
+                        audioEl.src = track;
+                        audioEl.play().catch(() => {
+                            const startAudio = () => {
+                                audioEl.play();
+                                window.removeEventListener('click', startAudio);
+                                window.removeEventListener('keydown', startAudio);
+                            };
+                            window.addEventListener('click', startAudio);
+                            window.addEventListener('keydown', startAudio);
+                        });
+                    }
+                } else {
+                    audioEl.pause();
+                    audioEl.src = '';
+                }
+            }
+            syncAudio();
+
+            window.addEventListener('storage', (e) => {
+                applyTheme();
+                syncAudio();
+            });
+
+            window.addEventListener('keydown', (e) => {
+                const panicKey = localStorage.getItem('site_panic_key');
+                if (panicKey && panicKey !== 'None' && e.key === panicKey) {
+                    window.location.href = 'https://www.google.com';
+                }
+            });
+        })();
     </script>
 
     <!-- UI & CANVAS ANIMATION SCRIPT -->
     <script>
-        // Sayings Engine
         const customSubtext = localStorage.getItem('site_subtext');
         const subtextElement = document.getElementById('randomQuote');
 
@@ -339,7 +377,6 @@
             subtextElement.textContent = sayings[randomIndex];
         }
 
-        // Canvas Dot Grid
         const canvas = document.getElementById('dotCanvas');
         const ctx = canvas.getContext('2d');
 
