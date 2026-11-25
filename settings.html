@@ -4,11 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Settings</title>
-    <!-- Site Icon (Favicon) -->
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/murt391/banana/main/ico.png">
     
     <style>
-        /* Base page layout matching index.html */
         html, body {
             margin: 0;
             padding: 0;
@@ -24,7 +22,6 @@
             transition: background-color 0.3s ease, color 0.3s ease;
         }
 
-        /* Interactive Dot Canvas Background */
         #dotCanvas {
             position: fixed;
             top: 0;
@@ -40,15 +37,13 @@
             position: fixed;
             top: 29px;
             left: 0;
-            right: 95px; /* Leaves clean spacing before the settings icon */
+            right: 95px;
             height: 44px;
             z-index: 9;
             display: flex;
             align-items: center;
             overflow: hidden;
             pointer-events: none;
-
-            /* Fades smoothly at the left screen edge and right before the back/settings button */
             -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
             mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
         }
@@ -59,7 +54,6 @@
             color: var(--accent-color, #ffed85);
             font-size: 1.35rem;
             font-weight: bold;
-            /* 25s total cycle: starts immediately, scrolls for 20s, pauses 5s at the end */
             animation: slideLeftWithPause 25s linear infinite;
         }
 
@@ -74,7 +68,6 @@
             }
         }
 
-        /* Header Wrapper Container */
         .header-wrapper {
             position: relative;
             z-index: 10;
@@ -84,7 +77,6 @@
             align-items: center;
         }
 
-        /* Top Header Container Spread Across Screen */
         .header {
             display: flex;
             align-items: center;
@@ -97,7 +89,6 @@
             box-sizing: border-box;
         }
 
-        /* Solid Divider Line */
         .header-divider {
             width: calc(100% - 400px);
             height: 1.5px;
@@ -106,14 +97,12 @@
             box-sizing: border-box;
         }
 
-        /* Title Container */
         .title-container {
             display: flex;
             align-items: baseline;
             gap: 14px;
         }
 
-        /* Title */
         .title {
             color: var(--accent-color, #ffed85);
             font-size: 3rem;
@@ -121,14 +110,12 @@
             line-height: 1;
         }
 
-        /* Controls Group */
         .header-controls {
             display: flex;
             align-items: center;
             gap: 16px;
         }
 
-        /* Back Button Base Styling */
         .icon-btn {
             display: flex;
             align-items: center;
@@ -157,7 +144,6 @@
             height: 24px;
         }
 
-        /* Settings Container & Cards */
         .settings-container {
             position: relative;
             z-index: 10;
@@ -211,7 +197,6 @@
             margin-top: 4px;
         }
 
-        /* Custom Toggle Switch */
         .switch {
             position: relative;
             display: inline-block;
@@ -258,7 +243,6 @@
             background-color: #191919;
         }
 
-        /* Form Controls */
         select, input[type="text"] {
             background: rgba(20, 20, 20, 0.8);
             border: 1px solid rgba(255, 255, 255, 0.2);
@@ -272,7 +256,7 @@
             transition: border-color 0.2s ease;
         }
 
-        select:focus, input[type="text"]:focus {
+        select:focus {
             border-color: var(--accent-color, #ffed85);
         }
 
@@ -285,7 +269,6 @@
             background: transparent;
         }
 
-        /* Custom Range Slider */
         input[type="range"] {
             -webkit-appearance: none;
             appearance: none;
@@ -317,7 +300,6 @@
             gap: 12px;
         }
 
-        /* Custom Drag & Drop Zone */
         .drop-zone {
             width: 100%;
             border: 2px dashed rgba(255, 255, 255, 0.25);
@@ -386,7 +368,7 @@
 
     <!-- Top Announcement Bar -->
     <div class="announcement-bar" id="announcementBar">
-        <div class="announcement-text">new update soon! also first time trying out announcement system.</div>
+        <div class="announcement-text" id="announcementTextDisplay"></div>
     </div>
 
     <!-- Header Wrapper -->
@@ -447,7 +429,7 @@
                 </div>
             </div>
 
-            <!-- Announcement Toggle Row -->
+            <!-- Announcement Toggle Switch -->
             <div class="setting-row" style="margin-top: 6px;">
                 <div>
                     <div class="setting-label">Announcement Banner</div>
@@ -477,7 +459,6 @@
                 </select>
             </div>
 
-            <!-- Enhanced Custom Drag & Drop Container -->
             <div id="customFileContainer" style="display: none; flex-direction: column; gap: 8px;">
                 <div class="setting-label">Upload Audio File</div>
                 <div class="drop-zone" id="dropZone">
@@ -522,6 +503,9 @@
     <!-- SETTINGS ENGINE & CONTROLLER -->
     <script>
         (function() {
+            // ---> CHANGE YOUR GLOBAL ANNOUNCEMENT TEXT HERE <---
+            const GLOBAL_ANNOUNCEMENT = "new update soon! also first time trying out announcement system.";
+
             const themes = {
                 default: { bg: '#191919', accent: '#ffed85', text: '#ffffff' },
                 modern: { bg: '#0f172a', accent: '#38bdf8', text: '#f8fafc' },
@@ -539,6 +523,7 @@
             const accentColorPicker = document.getElementById('accentColorPicker');
             const announcementToggle = document.getElementById('announcementToggle');
             const announcementBar = document.getElementById('announcementBar');
+            const announcementTextDisplay = document.getElementById('announcementTextDisplay');
 
             const musicSelect = document.getElementById('musicSelect');
             const customFileContainer = document.getElementById('customFileContainer');
@@ -572,15 +557,17 @@
                 accentColorPicker.value = accent;
             }
 
-            // Load Saved Values
             const savedTheme = localStorage.getItem('site_theme_preset') || 'default';
             themeSelect.value = savedTheme;
             applyTheme(savedTheme);
 
+            // Display global text
+            announcementTextDisplay.textContent = GLOBAL_ANNOUNCEMENT;
+
             const savedAnnouncementState = localStorage.getItem('site_announcement_enabled');
             const isAnnouncementOn = savedAnnouncementState === null ? true : (savedAnnouncementState === 'true');
             announcementToggle.checked = isAnnouncementOn;
-            announcementBar.style.display = isAnnouncementOn ? 'flex' : 'none';
+            announcementBar.style.display = (isAnnouncementOn && GLOBAL_ANNOUNCEMENT !== "") ? 'flex' : 'none';
 
             const savedMusic = localStorage.getItem('site_active_music') || 'none';
             if (savedMusic.startsWith('data:audio') || savedMusic === 'custom') {
@@ -603,7 +590,6 @@
             const savedPanic = localStorage.getItem('site_panic_key') || 'None';
             panicKeyInput.value = savedPanic;
 
-            // Audio Player Initialization
             let audioEl = document.getElementById('global-bg-audio');
             if (!audioEl) {
                 audioEl = document.createElement('audio');
@@ -629,7 +615,6 @@
             }
             syncAudio();
 
-            // Theme Events
             themeSelect.addEventListener('change', (e) => {
                 const val = e.target.value;
                 localStorage.setItem('site_theme_preset', val);
@@ -648,14 +633,12 @@
                 applyTheme('custom');
             });
 
-            // Announcement Toggle Event
             announcementToggle.addEventListener('change', (e) => {
                 const enabled = e.target.checked;
                 localStorage.setItem('site_announcement_enabled', enabled);
-                announcementBar.style.display = enabled ? 'flex' : 'none';
+                announcementBar.style.display = (enabled && GLOBAL_ANNOUNCEMENT !== "") ? 'flex' : 'none';
             });
 
-            // Music Events
             musicSelect.addEventListener('change', (e) => {
                 const val = e.target.value;
                 if (val === 'custom') {
@@ -672,7 +655,6 @@
                 }
             });
 
-            // File Processing Handler
             function processAudioFile(file) {
                 if (!file || !file.type.startsWith('audio/')) return;
                 
@@ -691,43 +673,25 @@
                 reader.readAsDataURL(file);
             }
 
-            // Drag and Drop Events
             dropZone.addEventListener('click', () => customAudioFile.click());
-
-            dropZone.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                dropZone.classList.add('dragover');
-            });
-
-            ['dragleave', 'dragend'].forEach(type => {
-                dropZone.addEventListener(type, () => dropZone.classList.remove('dragover'));
-            });
-
+            dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+            ['dragleave', 'dragend'].forEach(type => dropZone.addEventListener(type, () => dropZone.classList.remove('dragover')));
             dropZone.addEventListener('drop', (e) => {
                 e.preventDefault();
                 dropZone.classList.remove('dragover');
-                if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-                    processAudioFile(e.dataTransfer.files[0]);
-                }
+                if (e.dataTransfer.files && e.dataTransfer.files[0]) processAudioFile(e.dataTransfer.files[0]);
             });
-
             customAudioFile.addEventListener('change', (e) => {
-                if (e.target.files && e.target.files[0]) {
-                    processAudioFile(e.target.files[0]);
-                }
+                if (e.target.files && e.target.files[0]) processAudioFile(e.target.files[0]);
             });
 
-            // Volume Slider Event
             volumeSlider.addEventListener('input', (e) => {
                 const val = e.target.value;
                 localStorage.setItem('site_music_volume', val);
                 volumeValue.textContent = Math.round(parseFloat(val) * 100) + '%';
-                if (audioEl) {
-                    audioEl.volume = parseFloat(val);
-                }
+                if (audioEl) audioEl.volume = parseFloat(val);
             });
 
-            // Panic Key Handler
             panicKeyInput.addEventListener('keydown', (e) => {
                 e.preventDefault();
                 const key = e.key === 'Escape' ? 'None' : e.key;
@@ -744,16 +708,11 @@
         })();
     </script>
 
-    <!-- Interactive Canvas Dot Background -->
     <script>
         const canvas = document.getElementById('dotCanvas');
         const ctx = canvas.getContext('2d');
-
-        let width, height;
-        let dots = [];
-        
-        const gap = 30;
-        const radius = 100;
+        let width, height, dots = [];
+        const gap = 30, radius = 100;
         const mouse = { x: -1000, y: -1000 };
 
         function resize() {
@@ -766,72 +725,40 @@
             dots = [];
             for (let x = gap / 2; x < width; x += gap) {
                 for (let y = gap / 2; y < height; y += gap) {
-                    dots.push({
-                        baseX: x,
-                        baseY: y,
-                        x: x,
-                        y: y,
-                        vx: 0,
-                        vy: 0
-                    });
+                    dots.push({ baseX: x, baseY: y, x: x, y: y, vx: 0, vy: 0 });
                 }
             }
         }
 
-        window.addEventListener('mousemove', (e) => {
-            mouse.x = e.clientX;
-            mouse.y = e.clientY;
-        });
-
-        window.addEventListener('mouseleave', () => {
-            mouse.x = -1000;
-            mouse.y = -1000;
-        });
-
+        window.addEventListener('mousemove', (e) => { mouse.x = e.clientX; mouse.y = e.clientY; });
+        window.addEventListener('mouseleave', () => { mouse.x = -1000; mouse.y = -1000; });
         window.addEventListener('resize', resize);
 
         function animate() {
             ctx.clearRect(0, 0, width, height);
-
             dots.forEach(dot => {
-                const dx = mouse.x - dot.x;
-                const dy = mouse.y - dot.y;
+                const dx = mouse.x - dot.x, dy = mouse.y - dot.y;
                 const dist = Math.sqrt(dx * dx + dy * dy);
-
                 if (dist < radius) {
                     const angle = Math.atan2(dy, dx);
                     const force = (radius - dist) / radius;
-                    const pushX = Math.cos(angle) * force * 12;
-                    const pushY = Math.sin(angle) * force * 12;
-
-                    dot.vx -= pushX;
-                    dot.vy -= pushY;
+                    dot.vx -= Math.cos(angle) * force * 12;
+                    dot.vy -= Math.sin(angle) * force * 12;
                 }
-
-                const homeDx = dot.baseX - dot.x;
-                const homeDy = dot.baseY - dot.y;
-                
-                dot.vx += homeDx * 0.08;
-                dot.vy += homeDy * 0.08;
-                
-                dot.vx *= 0.75;
-                dot.vy *= 0.75;
-
-                dot.x += dot.vx;
-                dot.y += dot.vy;
+                dot.vx += (dot.baseX - dot.x) * 0.08;
+                dot.vy += (dot.baseY - dot.y) * 0.08;
+                dot.vx *= 0.75; dot.vy *= 0.75;
+                dot.x += dot.vx; dot.y += dot.vy;
 
                 ctx.beginPath();
                 ctx.arc(dot.x, dot.y, 2, 0, Math.PI * 2);
                 ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
                 ctx.fill();
             });
-
             requestAnimationFrame(animate);
         }
-
         resize();
         animate();
     </script>
-
 </body>
 </html>
